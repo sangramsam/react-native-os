@@ -1,41 +1,45 @@
-def safeExtGet(prop, fallback) {
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
-}
-
 buildscript {
     repositories {
         jcenter()
     }
-
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath "com.android.tools.build:gradle:2.3.3"
     }
 }
 
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
+
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+def _reactNativeVersion = safeExtGet("reactNative", "+")
+def _compileSdkVersion = safeExtGet("compileSdkVersion", 26)
+def _glideVersion = safeExtGet("glideVersion", "4.7.1")
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 23)
-    buildToolsVersion safeExtGet('buildToolsVersion', '23.0.1')
+    compileSdkVersion _compileSdkVersion
+    buildToolsVersion safeExtGet("buildToolsVersion", "26.0.3")
 
-    defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 16)
-        targetSdkVersion safeExtGet('targetSdkVersion', 22)
-        versionCode 1
-        versionName "0.2.0"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    sourceSets {
+        main {
+            java {
+                if (safeExtGet("excludeAppGlideModule", false)) {
+                    srcDir "src"
+                    exclude "**/FastImageGlideModule.java"
+                }
+            }
         }
     }
 
-    // needed for https://github.com/square/okio/issues/58
+    defaultConfig {
+        minSdkVersion safeExtGet("minSdkVersion", 16)
+        targetSdkVersion safeExtGet("targetSdkVersion", 26)
+        versionCode 1
+        versionName "1.0"
+    }
     lintOptions {
         abortOnError false
-        warning 'InvalidPackage'
     }
 }
 
@@ -46,3 +50,4 @@ repositories {
 dependencies {
     compile 'com.facebook.react:react-native:+'
 }
+
